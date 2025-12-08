@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,9 +138,11 @@ const StudentDashboard = () => {
                     </span>
                     <span>{exam.duration}</span>
                   </div>
-                  <Button variant="accent" className="w-full">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Exam
+                  <Button variant="accent" className="w-full" asChild>
+                    <Link to="/exam/exam-ds-final-2025">
+                      <Play className="w-4 h-4 mr-2" />
+                      Start Exam
+                    </Link>
                   </Button>
                 </div>
               ))}

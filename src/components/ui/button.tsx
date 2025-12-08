@@ -19,6 +19,7 @@ const buttonVariants = cva(
         accent: "bg-accent text-accent-foreground shadow-lg hover:shadow-glow hover:-translate-y-0.5 hover:bg-accent/90",
         glass: "bg-glass border border-border/50 text-foreground backdrop-blur-md hover:bg-background/80",
         success: "bg-success text-success-foreground hover:bg-success/90 shadow-md",
+        warning: "bg-warning text-warning-foreground hover:bg-warning/90 shadow-md",
       },
       size: {
         default: "h-10 px-5 py-2",
