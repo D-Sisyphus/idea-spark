@@ -64,7 +64,7 @@ const HeroSection = () => {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-accent" />
-              <span className="text-sm">14-day free trial</span>
+              
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-accent" />
