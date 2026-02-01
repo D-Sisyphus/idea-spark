@@ -59,7 +59,7 @@ const HeroSection = () => {
           animationDelay: "0.4s"
         }}>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-accent" />
+              
               <span className="text-sm">No credit card required</span>
             </div>
             <div className="flex items-center gap-2">
