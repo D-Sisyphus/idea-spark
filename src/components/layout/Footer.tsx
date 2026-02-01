@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-accent-foreground" />
               </div>
-              <span className="font-display font-bold text-xl">ProctorEd</span>
+              <span className="font-display font-bold text-xl">Xamify</span>
             </Link>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
               Secure, scalable online examination platform with AI-powered proctoring for academic integrity.
@@ -117,7 +117,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/50">
-            © {new Date().getFullYear()} ProctorEd. All rights reserved.
+            © {new Date().getFullYear()} Xamify. All rights reserved.
           </p>
           <p className="text-sm text-primary-foreground/50">
             Made with care for academic integrity

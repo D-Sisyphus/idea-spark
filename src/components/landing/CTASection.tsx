@@ -24,7 +24,7 @@ const CTASection = () => {
 
           {/* Description */}
           <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Join hundreds of institutions already using ProctorEd to deliver secure, 
+            Join hundreds of institutions already using Xamify to deliver secure, 
             scalable online examinations with AI-powered proctoring.
           </p>
 
