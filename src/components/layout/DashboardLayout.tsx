@@ -79,7 +79,7 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
               <GraduationCap className="w-5 h-5 text-primary-foreground" />
             </div>
             {sidebarOpen && (
-              <span className="font-display font-bold text-lg">ProctorEd</span>
+              <span className="font-display font-bold text-lg">Xamify</span>
             )}
           </Link>
           <button
