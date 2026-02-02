@@ -5,9 +5,9 @@ import "./index.css";
 import { AuthProvider } from "@/context/AuthContext";
 
 createRoot(document.getElementById("root")!).render(
-  <AuthProvider>
-    <HashRouter>
+  <HashRouter basename="/">
+    <AuthProvider>
       <App />
-    </HashRouter>
-  </AuthProvider>
+    </AuthProvider>
+  </HashRouter>
 );

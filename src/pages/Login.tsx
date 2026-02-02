@@ -28,22 +28,29 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate backend login
-    setTimeout(() => {
-      // ✅ SET AUTH STATE (THIS IS THE KEY LINE)
-      login({
-        id: "demo-user",
-        role: "student",
-      });
+    try {
+      // ✅ CALL AUTH CONTEXT (fake now, real backend later)
+      const user = await login(email, password);
 
       toast({
         title: "Welcome back!",
-        description: "You have successfully logged in.",
+        description: `Logged in as ${user.role}`,
       });
 
+      // ✅ ROLE-BASED REDIRECT
+      if (user.role === "admin") navigate("/admin");
+      else if (user.role === "teacher") navigate("/teacher");
+      else navigate("/student");
+
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      navigate("/student");
-    }, 800);
+    }
   };
 
   return (
@@ -73,7 +80,7 @@ const Login = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="student@test.com / teacher@test.com / admin@test.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
