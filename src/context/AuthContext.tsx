@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 type Role = "student" | "teacher" | "admin";
 
@@ -17,15 +17,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const STORAGE_KEY = "xamify_user";
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
+  // 🔄 Restore user from localStorage on app load
+  useEffect(() => {
+    const storedUser = localStorage.getItem(STORAGE_KEY);
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const login = async (email: string, password: string) => {
-    // 🔴 FAKE LOGIN (replace with backend later)
-    await new Promise((res) => setTimeout(res, 1000));
+    // 🔴 Fake backend delay
+    await new Promise((res) => setTimeout(res, 800));
 
     let role: Role = "student";
-
     if (email.includes("teacher")) role = "teacher";
     if (email.includes("admin")) role = "admin";
 
@@ -36,11 +45,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setUser(loggedInUser);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser));
+
     return loggedInUser;
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
