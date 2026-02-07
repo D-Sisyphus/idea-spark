@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,31 +21,34 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // Auto-redirect after successful login
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") navigate("/admin");
+      else if (user.role === "teacher") navigate("/teacher");
+      else navigate("/student");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // ✅ CALL AUTH CONTEXT (fake now, real backend later)
-      const user = await login(email, password);
+      await login(email, password);
 
       toast({
         title: "Welcome back!",
-        description: `Logged in as ${user.role}`,
+        description: "Successfully logged in",
       });
 
-      // ✅ ROLE-BASED REDIRECT
-      if (user.role === "admin") navigate("/admin");
-      else if (user.role === "teacher") navigate("/teacher");
-      else navigate("/student");
-
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: "Invalid credentials",
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       });
     } finally {

@@ -1,66 +1,126 @@
+// src/context/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
+import { Session, User } from "@supabase/supabase-js";
 
 type Role = "student" | "teacher" | "admin";
 
-interface User {
+interface Profile {
   id: string;
   email: string;
   role: Role;
+  full_name?: string;
+  avatar_url?: string;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: Profile | null;
+  session: Session | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<User>;
-  logout: () => void;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, role: Role, fullName?: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const STORAGE_KEY = "xamify_user";
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 🔄 Restore user from localStorage on app load
   useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY);
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        fetchProfile(session.user.id);
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+        setIsLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // 🔴 Fake backend delay
-    await new Promise((res) => setTimeout(res, 800));
+  const fetchProfile = async (userId: string) => {
+    try {
+      console.log("Fetching profile for user:", userId);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-    let role: Role = "student";
-    if (email.includes("teacher")) role = "teacher";
-    if (email.includes("admin")) role = "admin";
-
-    const loggedInUser: User = {
-      id: crypto.randomUUID(),
-      email,
-      role,
-    };
-
-    setUser(loggedInUser);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser));
-
-    return loggedInUser;
+      if (error) throw error;
+      console.log("Profile loaded:", data);
+      setUser(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+  };
+
+  const signup = async (email: string, password: string, role: Role, fullName?: string) => {
+    // Sign up user
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (signUpError) throw signUpError;
+
+    // Create profile
+    if (authData.user) {
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: authData.user.id,
+        email,
+        role,
+        full_name: fullName,
+      });
+
+      if (profileError) throw profileError;
+    }
+  };
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        session,
+        isAuthenticated: !!session,
+        isLoading,
         login,
+        signup,
         logout,
       }}
     >

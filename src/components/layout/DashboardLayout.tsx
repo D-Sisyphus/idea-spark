@@ -1,6 +1,14 @@
-import { Link, useLocation, Outlet } from "react-router-dom";
+import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -13,9 +21,11 @@ import {
   LogOut,
   ChevronDown,
   Menu,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavItem {
   icon: React.ElementType;
@@ -60,13 +70,24 @@ const navItemsMap = {
 
 const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navItems = navItemsMap[role];
+
+  // Get user initials and name
+  const userInitials = user?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.[0].toUpperCase() || 'U';
+  const displayName = user?.full_name || user?.email || 'User';
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside 
+      <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300",
           sidebarOpen ? "w-64" : "w-20"
@@ -100,8 +121,8 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
                 to={item.href}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
-                  isActive 
-                    ? "bg-accent text-accent-foreground shadow-md" 
+                  isActive
+                    ? "bg-accent text-accent-foreground shadow-md"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 )}
               >
@@ -128,16 +149,16 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
             sidebarOpen ? "" : "justify-center"
           )}>
             <div className="w-10 h-10 rounded-full bg-gradient-accent flex items-center justify-center text-accent-foreground font-semibold">
-              JD
+              {userInitials}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">John Doe</p>
+                <p className="font-medium text-sm truncate">{displayName}</p>
                 <p className="text-xs text-muted-foreground capitalize">{role}</p>
               </div>
             )}
             {sidebarOpen && (
-              <Button variant="ghost" size="icon" className="flex-shrink-0">
+              <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={handleLogout}>
                 <LogOut className="w-4 h-4" />
               </Button>
             )}
@@ -168,12 +189,43 @@ const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
             </Button>
-            <Button variant="ghost" className="gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-accent flex items-center justify-center text-accent-foreground font-semibold text-sm">
-                JD
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-accent flex items-center justify-center text-accent-foreground font-semibold text-sm">
+                    {userInitials}
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to={`/${role}/settings`} className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={`/${role}/settings`} className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

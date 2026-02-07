@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/context/AuthContext";
 import {
   FileText,
   Clock,
@@ -16,18 +17,18 @@ import {
 } from "lucide-react";
 
 const upcomingExams = [
-  { 
-    name: "Data Structures Final", 
+  {
+    name: "Data Structures Final",
     subject: "Computer Science",
-    date: "Dec 10, 2025", 
+    date: "Dec 10, 2025",
     time: "10:00 AM",
     duration: "2 hours",
     status: "upcoming"
   },
-  { 
-    name: "Calculus II Midterm", 
+  {
+    name: "Calculus II Midterm",
     subject: "Mathematics",
-    date: "Dec 12, 2025", 
+    date: "Dec 12, 2025",
     time: "2:00 PM",
     duration: "90 mins",
     status: "upcoming"
@@ -41,13 +42,18 @@ const recentResults = [
 ];
 
 const StudentDashboard = () => {
+  const { user } = useAuth();
+
+  // Extract first name from full_name or use fallback
+  const firstName = user?.full_name?.split(' ')[0] || 'Student';
+
   return (
     <DashboardLayout role="student">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold">Welcome, John!</h1>
+            <h1 className="text-3xl font-display font-bold">Welcome, {firstName}!</h1>
             <p className="text-muted-foreground">You have 2 upcoming exams this week.</p>
           </div>
           <Badge variant="accent" className="w-fit">
@@ -116,7 +122,7 @@ const StudentDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {upcomingExams.map((exam, index) => (
-                <div 
+                <div
                   key={index}
                   className="p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-3"
                 >
@@ -159,7 +165,7 @@ const StudentDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {recentResults.map((result, index) => (
-                <div 
+                <div
                   key={index}
                   className="p-4 rounded-xl bg-secondary/50 border border-border/50"
                 >

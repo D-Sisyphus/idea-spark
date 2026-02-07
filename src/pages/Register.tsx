@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GraduationCap, Eye, EyeOff, ArrowRight, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 const passwordRequirements = [
   { label: "At least 8 characters", regex: /.{8,}/ },
@@ -21,10 +23,13 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "student" as "student" | "teacher" | "admin",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -44,14 +49,28 @@ const Register = () => {
 
     setIsLoading(true);
 
-    // Simulate registration - replace with actual auth
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      await signup(formData.email, formData.password, formData.role, fullName);
+
       toast({
         title: "Account created!",
         description: "Please check your email to verify your account.",
       });
-    }, 1500);
+
+      // Redirect to login after successful signup
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -75,7 +94,7 @@ const Register = () => {
             Get started with your free account
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -101,6 +120,25 @@ const Register = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">I am a...</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value: "student" | "teacher" | "admin") =>
+                  setFormData((prev) => ({ ...prev, role: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="teacher">Teacher</SelectItem>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -136,16 +174,15 @@ const Register = () => {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              
+
               {/* Password Requirements */}
               {formData.password && (
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {passwordRequirements.map((req) => (
-                    <div 
+                    <div
                       key={req.label}
-                      className={`flex items-center gap-1.5 text-xs ${
-                        req.regex.test(formData.password) ? "text-success" : "text-muted-foreground"
-                      }`}
+                      className={`flex items-center gap-1.5 text-xs ${req.regex.test(formData.password) ? "text-success" : "text-muted-foreground"
+                        }`}
                     >
                       <Check className="w-3 h-3" />
                       {req.label}
@@ -168,10 +205,10 @@ const Register = () => {
               />
             </div>
 
-            <Button 
-              type="submit" 
-              variant="accent" 
-              size="lg" 
+            <Button
+              type="submit"
+              variant="accent"
+              size="lg"
               className="w-full"
               disabled={isLoading}
             >
