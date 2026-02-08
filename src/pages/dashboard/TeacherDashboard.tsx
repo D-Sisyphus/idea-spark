@@ -13,27 +13,28 @@ import {
   MoreVertical,
   CheckCircle,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const myExams = [
-  { 
-    name: "Data Structures Final", 
-    students: 145, 
+  {
+    name: "Data Structures Final",
+    students: 145,
     status: "active",
     pendingGrading: 23,
     violations: 3,
     date: "Dec 8, 2025"
   },
-  { 
-    name: "Algorithm Design Quiz", 
-    students: 89, 
+  {
+    name: "Algorithm Design Quiz",
+    students: 89,
     status: "scheduled",
     pendingGrading: 0,
     violations: 0,
     date: "Dec 10, 2025"
   },
-  { 
-    name: "Programming Basics", 
-    students: 234, 
+  {
+    name: "Programming Basics",
+    students: 234,
     status: "completed",
     pendingGrading: 45,
     violations: 8,
@@ -58,9 +59,11 @@ const TeacherDashboard = () => {
             <h1 className="text-3xl font-display font-bold">My Exams</h1>
             <p className="text-muted-foreground">Manage your exams and grade submissions.</p>
           </div>
-          <Button variant="accent">
-            <Plus className="w-4 h-4 mr-2" />
-            Create New Exam
+          <Button variant="default" asChild>
+            <Link to="/teacher/exams/create">
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Exam
+            </Link>
           </Button>
         </div>
 
@@ -124,7 +127,7 @@ const TeacherDashboard = () => {
           <CardContent>
             <div className="space-y-4">
               {myExams.map((exam, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border/50 gap-4"
                 >
@@ -160,7 +163,7 @@ const TeacherDashboard = () => {
                     <Badge variant={statusColors[exam.status as keyof typeof statusColors]}>
                       {exam.status}
                     </Badge>
-                    
+
                     <div className="flex items-center gap-2">
                       {exam.status === "active" && (
                         <Button variant="outline" size="sm">

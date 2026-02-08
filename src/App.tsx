@@ -10,6 +10,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import TeacherDashboard from "./pages/dashboard/TeacherDashboard";
+import CreateExam from "./pages/teacher/CreateExam";
+import ManageExams from "./pages/teacher/ManageExams";
+import ExamAnalytics from "./pages/teacher/ExamAnalytics";
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import TakeExam from "./pages/exam/TakeExam";
 import NotFound from "./pages/NotFound";
@@ -44,6 +47,30 @@ const App = () => (
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
               <TeacherDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/exams"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <ManageExams />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/exams/create"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <CreateExam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/exams/:examId"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <ExamAnalytics />
             </ProtectedRoute>
           }
         />
