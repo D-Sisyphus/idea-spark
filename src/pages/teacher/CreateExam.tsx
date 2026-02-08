@@ -16,6 +16,7 @@ import ExamPreview from "@/components/teacher/ExamPreview";
 // Hooks
 import { useCreateExam } from "@/hooks/teacher/useCreateExam";
 import { usePublishExam } from "@/hooks/teacher/usePublishExam";
+import { useEnrollStudents } from "@/hooks/teacher/useEnrollStudents";
 
 const STEPS = [
     { id: 1, title: "Basics" },
@@ -29,9 +30,8 @@ const CreateExam = () => {
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const createExamMutation = useCreateExam();
-    // We'll use this if we implement "Publish immediately" logic, 
-    // but typically we create as draft first, then publish.
     const publishExamMutation = usePublishExam();
+    const enrollStudentsMutation = useEnrollStudents();
 
     const [formData, setFormData] = useState({
         title: "",
@@ -87,14 +87,25 @@ const CreateExam = () => {
         }
     };
 
+    const prepareExamData = () => {
+        return {
+            ...formData,
+            instructions: typeof formData.instructions === 'string'
+                ? formData.instructions.split('\n').filter(Boolean)
+                : formData.instructions,
+            questions: formData.questions.map((q: any, index: number) => ({
+                ...q,
+                question_number: index + 1,
+            })),
+            start_time: formData.start_time || null,
+            end_time: formData.end_time || null,
+        };
+    };
+
     const handleSaveDraft = async () => {
         try {
-            await createExamMutation.mutateAsync({
-                ...formData,
-                instructions: formData.instructions.split('\n').filter(Boolean),
-                // We'll handle student enrollment separately or update the API to accept it
-                // For now, let's assume the API helps us or we do it in a sequence
-            });
+            const examData = prepareExamData();
+            await createExamMutation.mutateAsync(examData as any);
             navigate("/teacher/exams");
         } catch (error) {
             // Error handled by hook
@@ -103,14 +114,21 @@ const CreateExam = () => {
 
     const handlePublish = async () => {
         try {
-            const exam = await createExamMutation.mutateAsync({
-                ...formData,
-                instructions: formData.instructions.split('\n').filter(Boolean),
-            });
+            const examData = prepareExamData();
+            const exam = await createExamMutation.mutateAsync(examData as any);
 
-            // If we have an exam ID, we can publish it
+            // If we have an exam ID, publish it and enroll students
             if (exam?.id) {
                 await publishExamMutation.mutateAsync(exam.id);
+
+                // Enroll selected students if any
+                if (formData.selectedStudents.length > 0) {
+                    await enrollStudentsMutation.mutateAsync({
+                        examId: exam.id,
+                        studentIds: formData.selectedStudents,
+                    });
+                }
+
                 navigate("/teacher/exams");
             }
         } catch (error) {

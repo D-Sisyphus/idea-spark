@@ -26,6 +26,12 @@ export const useCreateExam = () => {
 
     return useMutation({
         mutationFn: async (input: CreateExamInput) => {
+            // Get current user
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError || !user) {
+                throw new Error("User not authenticated");
+            }
+
             // 1. Create exam
             const { data: exam, error: examError } = await supabase
                 .from("exams")
@@ -39,6 +45,7 @@ export const useCreateExam = () => {
                     start_time: input.start_time,
                     end_time: input.end_time,
                     is_published: false,
+                    created_by: user.id, // CRITICAL: Set the creator
                 })
                 .select()
                 .single();
